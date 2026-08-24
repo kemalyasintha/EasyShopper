@@ -9,4 +9,8 @@
     <ProjectReference Include="..\EShop.Product.DataProvider\EShop.Product.DataProvider.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="3.11.0" />
+  </ItemGroup>
+
 </Project>
