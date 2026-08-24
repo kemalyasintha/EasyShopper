@@ -14,7 +14,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.AllocateProductActiv
         {
             try
             {
-                var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/allocate_product"));
+                var endpoint = await context.GetSendEndpoint(new Uri("queue:allocate_product"));
                 var allocateProduct = JsonSerializer.Deserialize<AllocateProduct>(context.Message.Variables["PlacedOrder"].ToString());
                 await endpoint.Send(allocateProduct);
 
@@ -30,7 +30,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.AllocateProductActiv
         {
             try
             {
-            var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/release_product"));
+            var endpoint = await context.GetSendEndpoint(new Uri("queue:release_product"));
             var order = JsonSerializer.Deserialize<ReleaseProduct>(context.Message.Variables["PlacedOrder"].ToString());
 
             await endpoint.Send(order);

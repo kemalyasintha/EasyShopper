@@ -1,4 +1,4 @@
-﻿using EShop.Infrastructure.Command.Product;
+using EShop.Infrastructure.Command.Product;
 using EShop.Infrastructure.Event.Product;
 using EShop.Infrastructure.Query.Product;
 using MassTransit;
@@ -72,7 +72,7 @@ namespace EShop.ApiGateway.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Add([FromForm] CreateProduct product)
         {
-            var uri = new Uri("rabbitmq://localhost/create_product");
+            var uri = new Uri("queue:create_product");
             var endPoint = await _bus.GetSendEndpoint(uri);
             await endPoint.Send(product);
             
