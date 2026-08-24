@@ -19,7 +19,7 @@ namespace EShop.Cart.DataProvider.Repository
                 await _distributedCache.SetStringAsync(cart.UserId, JsonSerializer.Serialize(cart));
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

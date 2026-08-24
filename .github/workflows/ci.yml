@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-audit:
+    name: Build, test and audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Display SDK version
+        run: dotnet --version
+
+      - name: Restore dependencies
+        run: dotnet restore EShop.sln
+
+      - name: Build solution
+        run: dotnet build EShop.sln --configuration Release --no-restore --warnaserror
+
+      - name: Run tests
+        run: dotnet test EShop.sln --configuration Release --no-build --logger "console;verbosity=minimal"
+
+      - name: Audit NuGet packages
+        shell: bash
+        run: |
+          set -o pipefail
+          audit_output="$(dotnet list EShop.sln package --vulnerable --include-transitive 2>&1)"
+          echo "$audit_output"
+          if grep -q "has the following vulnerable packages" <<< "$audit_output"; then
+            echo "::error::Vulnerable NuGet packages were detected."
+            exit 1
+          fi

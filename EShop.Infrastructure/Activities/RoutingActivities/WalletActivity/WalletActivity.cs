@@ -38,7 +38,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.WalletActivity
                 Amount = context.Arguments.Amount
             }, new { });
             }
-            catch(Exception ex)
+            catch (Exception)
             {
                 return context.Faulted();
             }

@@ -33,8 +33,9 @@ namespace EShop.Order.Api.Handlers
                 var slip = CreateRoutingSlip(context);
                 await context.Execute(slip);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                throw;
             }
         }
 
