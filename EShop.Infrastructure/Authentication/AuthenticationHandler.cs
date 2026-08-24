@@ -18,7 +18,6 @@ namespace EShop.Infrastructure.Authentication
         private readonly SigningCredentials _credentials;
         private readonly JwtHeader _jwtHeader;
         private readonly TokenValidationParameters _tokenValidationParameters;
-        private readonly IConfiguration _configuration;
         public AuthenticationHandler(IConfiguration configuration)
         {
             _options = new JwtOptions();
@@ -41,14 +40,14 @@ namespace EShop.Infrastructure.Authentication
             var centuryBegin = new DateTime(1970, 1, 1).ToUniversalTime();
             var exp = (long)(new TimeSpan(expires.Ticks - centuryBegin.Ticks).TotalSeconds);
             var now = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
-            var payload = new JwtPayload
-            {
-                {"sub",userId },
-                {"iss", _options.Issuer },
-                {"iat",now },
-                {"exp", exp },
-                {"unique_name", userId }
-            };
+var payload = new JwtPayload
+{
+    {"sub",userId },
+    {"iss", _options.Issuer },
+    {"iat",now },
+    {"exp", exp },
+    {"unique_name", userId }
+};
             var jwt = new JwtSecurityToken(_jwtHeader, payload);
             var token = _jwtSecurityTokenhandler.WriteToken(jwt);
             var JsonToken = new JwtAuthToken
