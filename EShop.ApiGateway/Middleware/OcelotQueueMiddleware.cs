@@ -1,11 +1,11 @@
-﻿using EShop.ApiGateway.DTO;
+using EShop.ApiGateway.DTO;
 using EShop.Infrastructure.Command;
 using EShop.Infrastructure.Command.Product;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,7 +62,7 @@ namespace EShop.ApiGateway.Middleware
 
             var requiredType = _commandAssembly.ExportedTypes.Where(ty => ty.Name == type).FirstOrDefault();
 
-            var payload = JsonConvert.DeserializeObject(content, requiredType);
+            var payload = JsonSerializer.Deserialize(content, requiredType, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
             return payload;
         }

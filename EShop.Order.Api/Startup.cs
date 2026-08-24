@@ -5,7 +5,6 @@ using EShop.Infrastructure.Mongo;
 using EShop.Order.Api.Handlers;
 using EShop.Order.DataProvider.Repository;
 using EShop.Order.DataProvider.Services;
-using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -48,7 +47,7 @@ namespace EShop.Order.Api
                 x.AddConsumersFromNamespaceContaining<CreateOrderHandler>();
                 x.AddActivitiesFromNamespaceContaining<RoutingActivities>();
                 x.SetKebabCaseEndpointNameFormatter();
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(new Uri(rabbitmqOption.ConnectionString), hostconfig =>
                     {
@@ -56,8 +55,8 @@ namespace EShop.Order.Api
                         hostconfig.Password(rabbitmqOption.Password);
                     });
 
-                    cfg.ConfigureEndpoints(provider);
-                }));
+                    cfg.ConfigureEndpoints(context);
+                });
             });
         }
 
@@ -82,9 +81,6 @@ namespace EShop.Order.Api
             app.UseSwaggerUI(c => {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Order API");
             });
-
-            var busControl = app.ApplicationServices.GetService<IBusControl>();
-            busControl.Start();
 
             var dbInitializer = app.ApplicationServices.GetService<IDatabaseInitializer>();
             dbInitializer.InitializeAsync();

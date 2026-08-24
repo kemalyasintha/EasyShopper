@@ -3,7 +3,6 @@ using Eshop.Product.DataProvider.Service;
 using EShop.Infrastructure.EventBus;
 using EShop.Infrastructure.Mongo;
 using EShop.Product.Api.Handlers;
-using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,7 +35,7 @@ namespace EShop.Product.Api
 
             services.AddMassTransit(x => {
                 x.AddConsumer<CreateProductHandler>();
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(new Uri(rabbitmqOption.ConnectionString), hostconfig =>
                     {
@@ -47,9 +46,9 @@ namespace EShop.Product.Api
                     cfg.ReceiveEndpoint("create_product",ep => {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<CreateProductHandler>(provider);
+                        ep.ConfigureConsumer<CreateProductHandler>(context);
                     });
-                }));
+                });
             });
         }
 
@@ -69,8 +68,6 @@ namespace EShop.Product.Api
             {
                 endpoints.MapControllers();
             });
-            var busControl = app.ApplicationServices.GetService<IBusControl>();
-            busControl.Start();
 
             var dbInitializer = app.ApplicationServices.GetService<IDatabaseInitializer>();
             dbInitializer.InitializeAsync();

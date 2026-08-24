@@ -2,7 +2,6 @@ using EShop.Cart.Api.Handlers;
 using EShop.Cart.DataProvider.Repository;
 using EShop.Cart.DataProvider.Services;
 using EShop.Infrastructure.EventBus;
-using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -41,26 +40,26 @@ namespace EShop.Cart.Api
                 x.AddConsumer<AddCartItemConsumer>();
                 x.AddConsumer<RemoveCartItemConsumer>();
 
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg=> {
+                x.UsingRabbitMq((context, cfg) => {
                     cfg.Host(new Uri(options.ConnectionString), hostConfig => {
                         hostConfig.Username(options.Username);
-                        hostConfig.Username(options.Password);
+                        hostConfig.Password(options.Password);
                     });
 
                     cfg.ReceiveEndpoint("add_cart", ep =>
                     {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<AddCartItemConsumer>(provider);
+                        ep.ConfigureConsumer<AddCartItemConsumer>(context);
                     });
 
                     cfg.ReceiveEndpoint("remove_cart", ep =>
                     {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<RemoveCartItemConsumer>(provider);
+                        ep.ConfigureConsumer<RemoveCartItemConsumer>(context);
                     });
-                }));
+                });
             });
 
         }
@@ -81,9 +80,6 @@ namespace EShop.Cart.Api
             {
                 endpoints.MapControllers();
             });
-
-            var busControl = app.ApplicationServices.GetService<IBusControl>();
-            busControl.Start();
         }
     }
 }

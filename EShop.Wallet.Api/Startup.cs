@@ -7,7 +7,6 @@ using EShop.Infrastructure.Mongo;
 using EShop.Wallet.Api.Handlers;
 using EShop.Wallet.DataProvider.Repository;
 using EShop.Wallet.DataProvider.Services;
-using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,7 +44,7 @@ namespace EShop.Wallet.Api
             services.AddMassTransit(x=> {
                 x.AddConsumersFromNamespaceContaining<AddFundsConsumer>();
 
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg => {
+                x.UsingRabbitMq((context, cfg) => {
                     cfg.Host(new Uri(rabbitmqConfig.ConnectionString), hostConfig =>
                     {
                         hostConfig.Username(rabbitmqConfig.Username);
@@ -55,17 +54,16 @@ namespace EShop.Wallet.Api
                     cfg.ReceiveEndpoint("add_funds", ep=> {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<AddFundsConsumer>(provider);
+                        ep.ConfigureConsumer<AddFundsConsumer>(context);
                     });
 
                     cfg.ReceiveEndpoint("deduct_funds", ep => {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<DeductFundsConsumer>(provider);
+                        ep.ConfigureConsumer<DeductFundsConsumer>(context);
                     });
 
-                }));
-
+                });
             });
         }
 
@@ -87,9 +85,6 @@ namespace EShop.Wallet.Api
             {
                 endpoints.MapControllers();
             });
-
-            var busControl = app.ApplicationServices.GetService<IBusControl>();
-            busControl.Start();
 
             var dbInitializer = app.ApplicationServices.GetService<IDatabaseInitializer>();
             dbInitializer.InitializeAsync();

@@ -1,4 +1,4 @@
-﻿using EShop.Infrastructure.Command.User;
+using EShop.Infrastructure.Command.User;
 using EShop.Infrastructure.Query.Product;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
@@ -16,20 +16,18 @@ namespace EShop.Infrastructure.EventBus
 
             // establish connection with rabbitMQ..
             services.AddMassTransit(x => {
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(new Uri(rabbitMq.ConnectionString), hostcfg => {
                         hostcfg.Username(rabbitMq.Username);
                         hostcfg.Password(rabbitMq.Password);
                     });
-                    cfg.ConfigureEndpoints(provider);
-                }));
+                    cfg.ConfigureEndpoints(context);
+                });
                 x.AddRequestClient<GetProductById>();
                 x.AddRequestClient<LoginUser>();
                 x.AddRequestClient<Order.Order>();
             });
-
-            services.AddMassTransitHostedService();
 
             return services;
         }

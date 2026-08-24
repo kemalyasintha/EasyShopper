@@ -9,5 +9,10 @@
     <ProjectReference Include="..\EShop.Inventory.DataProvider\EShop.Inventory.DataProvider.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.5.7" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
+  </ItemGroup>
+
 
 </Project>

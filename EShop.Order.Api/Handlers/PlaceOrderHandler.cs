@@ -1,4 +1,4 @@
-﻿using MassTransit;
+using MassTransit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,9 +44,9 @@ namespace EShop.Order.Api.Handlers
             {
                 var message = context.Message;
 
-                var requestId = message.GetVariable<Guid?>("RequestId");
-                var responseAddress = message.GetVariable<Uri>("ResponseAddress");
-                var order = message.GetVariable<Order>("PlacedOrder");
+                var requestId = context.GetVariable<Guid>("RequestId");
+                var responseAddress = context.GetVariable<Uri>("ResponseAddress");
+                var order = context.GetVariable<Order>("PlacedOrder");
 
                 if(requestId.HasValue && responseAddress != null)
                 {
@@ -68,9 +68,9 @@ namespace EShop.Order.Api.Handlers
             {
                 var message = context.Message;
 
-                var requestId = message.GetVariable<Guid?>("RequestId");
-                var responseAddress = message.GetVariable<Uri>("ResponseAddress");
-                var order = message.GetVariable<Order>("PlacedOrder");
+                var requestId = context.GetVariable<Guid>("RequestId");
+                var responseAddress = context.GetVariable<Uri>("ResponseAddress");
+                var order = context.GetVariable<Order>("PlacedOrder");
 
                 if (requestId.HasValue && responseAddress != null)
                 {

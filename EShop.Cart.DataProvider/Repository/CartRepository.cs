@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -16,7 +16,7 @@ namespace EShop.Cart.DataProvider.Repository
         {
             try
             {
-                await _distributedCache.SetStringAsync(cart.UserId, JsonConvert.SerializeObject(cart));
+                await _distributedCache.SetStringAsync(cart.UserId, JsonSerializer.Serialize(cart));
                 return true;
             }
             catch (Exception ex)
@@ -32,7 +32,7 @@ namespace EShop.Cart.DataProvider.Repository
             if (string.IsNullOrEmpty(existingCart))
                 return new Infrastructure.Cart.Cart();
 
-            return JsonConvert.DeserializeObject<Infrastructure.Cart.Cart>(existingCart);
+            return JsonSerializer.Deserialize<Infrastructure.Cart.Cart>(existingCart);
         }
 
         public async Task<bool> RemoveCart(string UserId)
