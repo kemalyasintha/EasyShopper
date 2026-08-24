@@ -12,7 +12,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.UpdateCartActivity
         {
             try
             {
-                var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/remove_cart"));
+                var endpoint = await context.GetSendEndpoint(new Uri("queue:remove_cart"));
                 await endpoint.Send(context.Arguments);
 
                 return context.Completed();

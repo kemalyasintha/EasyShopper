@@ -117,63 +117,118 @@ The workflow fails when:
 - any automated test fails; or
 - a vulnerable direct or transitive NuGet dependency is detected.
 
+## Run locally with Docker
+
+### Prerequisites
+
+- Docker Desktop with Docker Compose
+- Git
+- A local copy of this repository
+
+### Start the complete stack
+
+Copy the example environment file, replace its placeholder values with strong local secrets, and start the services:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+docker compose config --quiet
+docker compose up -d --build --wait --wait-timeout 240
+```
+
+All published ports are bound to `127.0.0.1` for local development. After startup, open the API Gateway Swagger UI at <http://localhost:6355/swagger/index.html>.
+
+### Local endpoints
+
+| Component | Local endpoint |
+|---|---|
+| API Gateway and Swagger | `http://localhost:6355` |
+| User API | `http://localhost:6388` |
+| User Query API | `http://localhost:13322` |
+| Product API | `http://localhost:6406` |
+| Product Query API | `http://localhost:9559` |
+| Order API | `http://localhost:6420` |
+| Cart API | `http://localhost:18586` |
+| Inventory API | `http://localhost:14639` |
+| Wallet API | `http://localhost:2016` |
+| MongoDB | `localhost:27017` |
+| RabbitMQ | `localhost:5672` |
+| RabbitMQ management UI | `http://localhost:15672` |
+| Redis | `localhost:6379` |
+
+Check container health with `docker compose ps`. Stop the stack without deleting its persisted data by running:
+
+```powershell
+docker compose down
+```
+
+Do not add `-v` unless you intentionally want to delete the MongoDB, RabbitMQ, Redis, and data-protection volumes.
+
 ## Validate the repository
 
 ### Prerequisites
 
 - .NET 10 SDK compatible with the version in `global.json`
+- Docker Desktop with Docker Compose
 - Git
 
-Run the same core checks used by CI:
+Run the same checks used by CI:
 
-```bash
+```powershell
 dotnet restore EShop.sln
 dotnet build EShop.sln --configuration Release --no-restore --warnaserror
 dotnet test EShop.sln --configuration Release --no-build --logger "console;verbosity=minimal"
 dotnet list EShop.sln package --vulnerable --include-transitive
+docker compose config --quiet
+docker build --build-arg PROJECT_PATH=EShop.ApiGateway/EShop.ApiGateway.csproj --tag easyshopper/api-gateway:local .
 ```
 
-At the current checkpoint, the solution builds successfully, the automated test suite passes, and the configured NuGet sources report no known vulnerable packages.
+Current checkpoint: the solution builds with warnings treated as errors, all 3 automated tests pass, the configured NuGet sources report no known vulnerable packages, the Compose definition validates, and the API Gateway container image builds.
 
 ## Runtime dependencies
 
-Running the complete distributed application requires:
+Docker Compose provisions the supporting infrastructure used by the local stack:
 
-| Dependency | Default local endpoint | Purpose |
-|---|---|---|
-| RabbitMQ | `localhost:5672` | Commands, events, request/response, and routing-slip activities |
-| MongoDB | `localhost:27017` | User, product, order, inventory, and wallet persistence |
-| Redis | `localhost:6379` | Cart storage and gateway caching examples |
+| Dependency | Compose service | Host endpoint | Purpose |
+|---|---|---|---|
+| RabbitMQ | `rabbitmq` | `localhost:5672` | Commands, events, request/response, and routing-slip activities |
+| RabbitMQ management UI | `rabbitmq` | `http://localhost:15672` | Local broker inspection |
+| MongoDB | `mongo` | `localhost:27017` | User, product, order, inventory, and wallet persistence |
+| Redis | `redis` | `localhost:6379` | Cart storage and gateway caching examples |
 
-The current configuration uses development-only local endpoints. Docker Compose orchestration and environment-based runtime configuration are listed in the roadmap below.
+All published ports are bound to `127.0.0.1` for local development. Compose health checks prevent dependent services from starting before their dependencies are ready.
 
 ## Local secrets
 
-The JWT signing key is not committed to `appsettings.json`. Configure it locally for both token creation and validation:
+Copy `.env.example` to `.env` and replace its placeholder values before starting the stack:
 
-```bash
-dotnet user-secrets set "jwt:SecretKey" "replace-with-a-random-secret-of-at-least-64-characters" --project EShop.ApiGateway/EShop.ApiGateway.csproj
-dotnet user-secrets set "jwt:SecretKey" "replace-with-the-same-random-secret" --project EShop.User.Query.Api/EShop.User.Query.Api.csproj
+```powershell
+Copy-Item .env.example .env
+notepad .env
 ```
 
-The `guest` RabbitMQ credentials in committed configuration are intended only for an isolated local development broker. Production credentials must come from a secret store or environment variables.
+The `.env` file is ignored by Git. Committed configuration contains no working JWT signing key or RabbitMQ password. Production deployments should retrieve secrets from Azure Key Vault or another managed secret store.
 
 ## Repository structure
 
 ```text
 EasyShopper/
-|-- .github/workflows/          # CI build, test, and dependency audit
-|-- EShop.ApiGateway/           # Ocelot gateway and async command middleware
-|-- EShop.Infrastructure/       # Contracts, messaging, security, and activities
-|-- EShop.User.*/               # User command, query, and persistence projects
-|-- EShop.Product.*/            # Product command, query, and persistence projects
-|-- EShop.Order.*/              # Order API and persistence projects
-|-- EShop.Cart.*/               # Redis-backed cart projects
-|-- EShop.Inventory.*/          # Inventory API and persistence projects
-|-- EShop.Wallet.*/             # Wallet API and persistence projects
-|-- EShop.*.Test/               # Automated test projects
+|-- .github/workflows/       # CI build, test, dependency, and Docker validation
+|-- .dockerignore            # Container build-context exclusions
+|-- .env.example             # Local environment-variable template
+|-- Dockerfile               # Reusable multi-stage .NET container build
+|-- compose.yaml             # Complete local distributed stack
+|-- EShop.ApiGateway/        # Ocelot gateway and async command middleware
+|-- EShop.Infrastructure/    # Contracts, messaging, security, and activities
+|-- EShop.User.*/            # User command, query, and persistence projects
+|-- EShop.Product.*/         # Product command, query, and persistence projects
+|-- EShop.Order.*/           # Order API and persistence projects
+|-- EShop.Cart.*/            # Redis-backed cart projects
+|-- EShop.Inventory.*/       # Inventory API and persistence projects
+|-- EShop.Wallet.*/          # Wallet API and persistence projects
+|-- EShop.*.Test/            # Automated test projects
 |-- EShop.sln
-`-- global.json
++-- global.json
 ```
 
 ## Engineering decisions demonstrated

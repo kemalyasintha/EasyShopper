@@ -16,7 +16,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.UpdateOrderActivity
         {
             try
             {
-                var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/create-order-handler"));
+                var endpoint = await context.GetSendEndpoint(new Uri("queue:create-order-handler"));
                 var createOrder = new CreateOrder
                 {
                     Items = context.Arguments.Items,

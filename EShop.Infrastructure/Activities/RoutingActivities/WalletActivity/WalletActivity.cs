@@ -15,7 +15,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.WalletActivity
             {
                 var addFunds = new AddFunds
                 { UserId = context.Log.UserId, CreditAmount = context.Log.Amount };
-                var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/add_funds"));
+                var endpoint = await context.GetSendEndpoint(new Uri("queue:add_funds"));
                 await endpoint.Send(addFunds);
 
                 return context.Compensated();
@@ -31,7 +31,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.WalletActivity
             try
             {
             var deductFunds = new DeductFunds() { UserId = context.Arguments.UserId, DebitAmount=context.Arguments.Amount };
-            var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/deduct_funds"));
+            var endpoint = await context.GetSendEndpoint(new Uri("queue:deduct_funds"));
             await endpoint.Send(deductFunds);
             return context.CompletedWithVariables<TransactMoneyLog>(new TransactMoneyLog {
                 UserId = context.Arguments.UserId,

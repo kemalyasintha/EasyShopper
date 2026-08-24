@@ -53,3 +53,13 @@ jobs:
             echo "::error::Vulnerable NuGet packages were detected."
             exit 1
           fi
+
+      - name: Validate Docker Compose
+        env:
+          JWT_SECRET_KEY: ci-validation-secret-key-with-at-least-64-characters-0123456789
+          RABBITMQ_USER: easyshopper
+          RABBITMQ_PASSWORD: ci-validation-password
+        run: docker compose config --quiet
+
+      - name: Build API Gateway container
+        run: docker build --build-arg PROJECT_PATH=EShop.ApiGateway/EShop.ApiGateway.csproj --tag easyshopper/api-gateway:ci .

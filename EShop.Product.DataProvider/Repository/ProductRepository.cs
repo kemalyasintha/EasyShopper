@@ -1,4 +1,4 @@
-﻿using EShop.Infrastructure.Command.Product;
+using EShop.Infrastructure.Command.Product;
 using EShop.Infrastructure.Common;
 using EShop.Infrastructure.Event.Product;
 using MongoDB.Driver;
@@ -32,6 +32,9 @@ namespace Eshop.Product.DataProvider.Repository
         {
             var product = new CreateProduct();
             product = await _collection.AsQueryable().FirstOrDefaultAsync(x => x.ProductId == ProductId);
+
+            if (product is null)
+                return null;
             return new ProductCreated() { ProductId = product.ProductId, ProductName = product.ProductName };
 
         }

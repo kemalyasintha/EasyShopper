@@ -1,4 +1,4 @@
-﻿using EShop.Infrastructure.Authentication;
+using EShop.Infrastructure.Authentication;
 using EShop.Infrastructure.Command.User;
 using EShop.Infrastructure.Event.User;
 using MassTransit;
@@ -24,7 +24,7 @@ namespace EShop.ApiGateway.Controllers
         public async Task<IActionResult> Add([FromForm] CreateUser user)
         {
 
-            var uri = new Uri("rabbitmq://localhost/add_user");
+            var uri = new Uri("queue:add_user");
             var endPoint = await _bus.GetSendEndpoint(uri);
             await endPoint.Send(user);
 
