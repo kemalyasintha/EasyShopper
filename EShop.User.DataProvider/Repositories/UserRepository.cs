@@ -1,4 +1,4 @@
-﻿using EShop.Infrastructure.Command.User;
+using EShop.Infrastructure.Command.User;
 using EShop.Infrastructure.Event.User;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -45,6 +45,9 @@ namespace EShop.User.DataProvider
         public async Task<UserCreated> GetUserByUsername(string name)
         {
             var userResult = await _collection.AsQueryable().FirstOrDefaultAsync(usr => usr.Username == name);
+
+            if (userResult is null)
+                return null;
 
             return new UserCreated()
             {

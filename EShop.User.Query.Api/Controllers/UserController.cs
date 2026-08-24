@@ -1,4 +1,4 @@
-﻿using EShop.Infrastructure.Event.User;
+using EShop.Infrastructure.Event.User;
 using EShop.User.DataProvider;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +20,16 @@ namespace EShop.User.Query.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<UserCreated> GetUserById(string username)
+        public async Task<ActionResult<UserCreated>> GetUserById(string username)
         {
+            if (string.IsNullOrWhiteSpace(username))
+                return BadRequest(new { message = "Username is required." });
+
             var user = await _userService.GetUserByusername(username);
-            return user;
+
+            if (user is null)
+                return NotFound(new { message = "User was not found." });
+            return Ok(user);
         }
     }
 }
