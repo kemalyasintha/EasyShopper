@@ -1,16 +1,35 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+artifacts/
 *.dll
-**.cache
+*.exe
 *.pdb
 *.cache
-*.editorconfig
-*.cache
-EShop.Wallet.DataProvider/obj/Debug/netcoreapp3.1/EShop.Wallet.DataProvider.assets.cache
-*.cache
-EShop.Wallet.Api/obj/Debug/netcoreapp3.1/EShop.Wallet.Api.assets.cache
-EShop.Apigateway.Test/obj/Debug/netcoreapp3.1/EShop.Apigateway.Test.assets.cache
-*.exe
+
+# Visual Studio
+.vs/
+*.user
 *.suo
-**/bin/
-**/obj/
-*.dll
-*.cache
+*.userosscache
+*.sln.docstates
+
+# Other IDEs
+.vscode/
+.idea/
+
+# Tests and coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+
+# Operating-system files
+.DS_Store
+Thumbs.db
