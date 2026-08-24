@@ -164,6 +164,134 @@ services:
       rabbitmq:
         condition: service_healthy
 
+
+  user-api:
+    image: easyshopper/user-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.User.Api/EShop.User.Api.csproj
+    command: ["EShop.User.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6388:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  product-api:
+    image: easyshopper/product-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.Product.Api/EShop.Product.Api.csproj
+    command: ["EShop.Product.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6406:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  cart-api:
+    image: easyshopper/cart-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.Cart.Api/EShop.Cart.Api.csproj
+    command: ["EShop.Cart.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18586:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      Redis__Host: redis
+      Redis__Port: "6379"
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+
+  inventory-api:
+    image: easyshopper/inventory-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.Inventory.Api/EShop.Inventory.Api.csproj
+    command: ["EShop.Inventory.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:14639:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  wallet-api:
+    image: easyshopper/wallet-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.Wallet.Api/EShop.Wallet.Api.csproj
+    command: ["EShop.Wallet.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:2016:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   mongo-data:
   rabbitmq-data:
