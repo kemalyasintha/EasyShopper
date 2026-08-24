@@ -56,9 +56,6 @@ namespace EShop.ApiGateway
             {
                 endpoints.MapControllers();
             });
-
-            var bus = app.ApplicationServices.GetService<IBusControl>();
-            //bus.Start();
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using EShop.Infrastructure.Command.Wallet;
-using MassTransit.Courier;
+using EShop.Infrastructure.Command.Wallet;
+using MassTransit;
 using System;
 using System.Collections.Generic;
 using System.Text;

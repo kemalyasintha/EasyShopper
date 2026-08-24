@@ -1,4 +1,4 @@
-﻿using Eshop.Product.DataProvider.Service;
+using Eshop.Product.DataProvider.Service;
 using EShop.Infrastructure.Event.Product;
 using EShop.Infrastructure.Query.Product;
 using MassTransit;
@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace EShop.Product.Query.Api.Handlers
 {
-    [Obsolete("This consumer will no longer be called for request/response")]
     public class GetProductByIdHandler : IConsumer<GetProductById>
     {
         private IProductService _service;

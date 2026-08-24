@@ -41,7 +41,7 @@ namespace EShop.User.Query.Api
 
             services.AddMassTransit(x => {
                 x.AddConsumer<LoginUserHandler>();
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     var rabbitMq = new RabbitMqOption();
                     Configuration.GetSection("rabbitmq").Bind(rabbitMq);
@@ -50,9 +50,8 @@ namespace EShop.User.Query.Api
                         hostcfg.Username(rabbitMq.Username);
                         hostcfg.Password(rabbitMq.Password);
                     });
-                    cfg.ConfigureEndpoints(provider);
-                }));
-
+                    cfg.ConfigureEndpoints(context);
+                });
             });
         }
 
@@ -70,9 +69,6 @@ namespace EShop.User.Query.Api
 
             var dbInitializer = app.ApplicationServices.GetService<IDatabaseInitializer>();
             dbInitializer.InitializeAsync();
-
-            var busControl = app.ApplicationServices.GetService<IBusControl>();
-            busControl.Start();
 
             app.UseEndpoints(endpoints =>
             {

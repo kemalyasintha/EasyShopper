@@ -1,6 +1,6 @@
-﻿using EShop.Infrastructure.Command.Inventory;
-using MassTransit.Courier;
-using Newtonsoft.Json;
+using EShop.Infrastructure.Command.Inventory;
+using MassTransit;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +15,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.AllocateProductActiv
             try
             {
                 var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/allocate_product"));
-                var allocateProduct = JsonConvert.DeserializeObject<AllocateProduct>(context.Message.Variables["PlacedOrder"].ToString());
+                var allocateProduct = JsonSerializer.Deserialize<AllocateProduct>(context.Message.Variables["PlacedOrder"].ToString());
                 await endpoint.Send(allocateProduct);
 
                 return context.Compensated();
@@ -31,7 +31,7 @@ namespace EShop.Infrastructure.Activities.RoutingActivities.AllocateProductActiv
             try
             {
             var endpoint = await context.GetSendEndpoint(new Uri("rabbitmq://localhost/release_product"));
-            var order = JsonConvert.DeserializeObject<ReleaseProduct>(context.Message.Variables["PlacedOrder"].ToString());
+            var order = JsonSerializer.Deserialize<ReleaseProduct>(context.Message.Variables["PlacedOrder"].ToString());
 
             await endpoint.Send(order);
 

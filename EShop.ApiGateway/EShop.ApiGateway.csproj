@@ -1,21 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <UserSecretsId>d9c13ded-551b-4384-a094-85fa6a530e9d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="6.3.2" />
-    <PackageReference Include="MassTransit.AspNetCore" Version="6.3.2" />
-    <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="6.3.2" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="6.3.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.3" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
-    <PackageReference Include="Ocelot" Version="16.0.1" />
-    <PackageReference Include="Ocelot.Cache.CacheManager" Version="16.0.1" />
+    <PackageReference Include="MassTransit" Version="8.5.7" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.7" />
+    <PackageReference Include="Ocelot" Version="25.0.0" />
+    <PackageReference Include="Ocelot.Cache.CacheManager" Version="25.0.0" />
     <PackageReference Include="Polly" Version="7.2.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
   <ItemGroup>

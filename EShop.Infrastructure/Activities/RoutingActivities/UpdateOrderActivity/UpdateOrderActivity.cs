@@ -1,5 +1,5 @@
-﻿using EShop.Infrastructure.Command.Order;
-using MassTransit.Courier;
+using EShop.Infrastructure.Command.Order;
+using MassTransit;
 using System;
 using System.Threading.Tasks;
 

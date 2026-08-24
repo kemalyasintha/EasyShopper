@@ -7,7 +7,6 @@ using EShop.Infrastructure.Mongo;
 using EShop.Inventory.Api.Handlers;
 using EShop.Inventory.DataProvider.Repository;
 using EShop.Inventory.DataProvider.Services;
-using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,7 +41,7 @@ namespace EShop.Inventory.Api
                 x.AddConsumer<AllocateProductConsumer>();
                 x.AddConsumer<ReleaseProductConsumer>();
 
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(new Uri(rabbitmqOption.ConnectionString), hostconfig =>
                     {
@@ -53,14 +52,14 @@ namespace EShop.Inventory.Api
                     cfg.ReceiveEndpoint("allocate_product", ep => {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<AllocateProductConsumer>(provider);
+                        ep.ConfigureConsumer<AllocateProductConsumer>(context);
                     });
                     cfg.ReceiveEndpoint("release_product", ep => {
                         ep.PrefetchCount = 16;
                         ep.UseMessageRetry(retryConfig => { retryConfig.Interval(2, 100); });
-                        ep.ConfigureConsumer<ReleaseProductConsumer>(provider);
+                        ep.ConfigureConsumer<ReleaseProductConsumer>(context);
                     });
-                }));
+                });
             });
         }
 
@@ -80,8 +79,6 @@ namespace EShop.Inventory.Api
             {
                 endpoints.MapControllers();
             });
-            var busControl = app.ApplicationServices.GetService<IBusControl>();
-            busControl.Start();
 
             var dbInitializer = app.ApplicationServices.GetService<IDatabaseInitializer>();
             dbInitializer.InitializeAsync();

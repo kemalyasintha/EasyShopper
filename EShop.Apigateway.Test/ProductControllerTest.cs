@@ -23,6 +23,8 @@ namespace EShop.Apigateway.Test
                                             ProductName="testing product", 
                                             CreatedAt= DateTime.UtcNow };
 
+        object Response.Message => Message;
+
         public Guid? MessageId => throw new NotImplementedException();
 
         public Guid? RequestId => throw new NotImplementedException();
