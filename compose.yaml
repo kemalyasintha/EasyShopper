@@ -19,6 +19,9 @@ services:
     image: rabbitmq:4.3.5-management-alpine
     hostname: easyshopper-rabbitmq
     restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "127.0.0.1:5672:5672"
       - "127.0.0.1:15672:15672"
@@ -46,7 +49,34 @@ services:
       retries: 10
       start_period: 10s
 
+
+  api-gateway:
+    image: easyshopper/api-gateway:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.ApiGateway/EShop.ApiGateway.csproj
+    command: ["EShop.ApiGateway.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6355:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+      jwt__SecretKey: ${JWT_SECRET_KEY}
+    volumes:
+      - api-gateway-keys:/home/app/.aspnet/DataProtection-Keys
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   mongo-data:
   rabbitmq-data:
   redis-data:
+  api-gateway-keys:
