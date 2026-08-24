@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security.Cryptography;
 
 namespace EShop.Infrastructure.Security
@@ -8,8 +8,8 @@ namespace EShop.Infrastructure.Security
         private readonly string Salt = "VE8ZuB+RGTJZ/ep.PGu?Zd-ulIfi1eU_BTkdP.7#tN5e?8Ffik";
         public string GetHash(string value, string salt)
         {
-            var derivedBytes = new Rfc2898DeriveBytes(value, GetBytes(salt), 1000);
-            return Convert.ToBase64String(derivedBytes.GetBytes(50)); 
+            var derivedBytes = Rfc2898DeriveBytes.Pbkdf2(value, GetBytes(salt), 100_000, HashAlgorithmName.SHA256, 50);
+            return Convert.ToBase64String(derivedBytes);
         }
 
         public string GetSalt()
