@@ -6,13 +6,17 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": "13322"
+          "Port": 13322
         }
       ],
       "UpstreamPathTemplate": "/api/user/{uname}",
-      "UpstreamHttpmethod": [ "Get" ],
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
       "Key": "basicDetails",
-      "FileCacheOptions": { "TtlSeconds": 30 }
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      }
     },
     {
       "DownstreamPathTemplate": "/api/order/GetAllOrders?userid={uname}",
@@ -20,13 +24,17 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": "6420"
+          "Port": 6420
         }
       ],
       "UpstreamPathTemplate": "/api/order/{uname}",
-      "UpstreamHttpmethod": [ "Get" ],
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
       "Key": "userOrders",
-      "FileCacheOptions": { "TtlSeconds": 40 }
+      "FileCacheOptions": {
+        "TtlSeconds": 40
+      }
     },
     {
       "DownstreamPathTemplate": "/api/product/getproduct?productid={pid}",
@@ -34,19 +42,25 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": "9559"
+          "Port": 9559
         }
       ],
       "UpstreamPathTemplate": "/api/product/{pid}",
-      "UpstreamHttpmethod": [ "Get" ],
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
       "RateLimitOptions": {
+        "ClientIdHeader": "Oc-Client",
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
+        "EnableHeaders": true,
+        "Limit": 10,
         "Period": "15s",
-        "PeriodTimespan": 5,
-        "Limit": 1
+        "Wait": "5s",
+        "StatusCode": 429,
+        "QuotaMessage": "Rate limit exceeded. Retry later."
       }
-    },
+    }
   ],
   "AsyncRoutes": {
     "Authenticate": false,
@@ -66,13 +80,10 @@
         "basicDetails",
         "userOrders"
       ],
-      "UpstreamPathTemplate": "/api/order-history/{uname}",
+      "UpstreamPathTemplate": "/api/order-history/{uname}"
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:6355",
-    "RateLimitOptions": {
-      "QuotaExceededMessage": "Eshop resource management policy does not allow this request."
-    }
-    }
+    "BaseUrl": "http://localhost:6355"
   }
+}

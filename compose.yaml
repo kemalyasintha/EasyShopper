@@ -69,9 +69,98 @@ services:
       rabbitmq__Username: ${RABBITMQ_USER}
       rabbitmq__Password: ${RABBITMQ_PASSWORD}
       jwt__SecretKey: ${JWT_SECRET_KEY}
+      Routes__0__DownstreamHostAndPorts__0__Host: user-query-api
+      Routes__0__DownstreamHostAndPorts__0__Port: "8080"
+      Routes__1__DownstreamHostAndPorts__0__Host: order-api
+      Routes__1__DownstreamHostAndPorts__0__Port: "8080"
+      Routes__2__DownstreamHostAndPorts__0__Host: product-query-api
+      Routes__2__DownstreamHostAndPorts__0__Port: "8080"
+      GlobalConfiguration__BaseUrl: http://api-gateway:8080
     volumes:
       - api-gateway-keys:/home/app/.aspnet/DataProtection-Keys
     depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  user-query-api:
+    image: easyshopper/user-query-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.User.Query.Api/EShop.User.Query.Api.csproj
+    command: ["EShop.User.Query.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:13322:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      mongo__Database: User
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+      jwt__SecretKey: ${JWT_SECRET_KEY}
+      jwt__ExpiryMinutes: "10"
+      jwt__Issuer: EasyShopper
+      jwt__Audience: EasyShopper.Api
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  order-api:
+    image: easyshopper/order-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.Order.Api/EShop.Order.Api.csproj
+    command: ["EShop.Order.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6420:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      mongo__Database: Order
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  product-query-api:
+    image: easyshopper/product-query-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_PATH: EShop.Product.Query.Api/EShop.Product.Query.Api.csproj
+    command: ["EShop.Product.Query.Api.dll"]
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9559:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      mongo__ConnectionString: mongodb://mongo:27017
+      mongo__Database: Product
+      rabbitmq__ConnectionString: rabbitmq://rabbitmq
+      rabbitmq__Username: ${RABBITMQ_USER}
+      rabbitmq__Password: ${RABBITMQ_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
