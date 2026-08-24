@@ -33,7 +33,7 @@ namespace EShop.Order.Api
             services.AddScoped<IOrderService, OrderService>();
             services.AddMongoDb(Configuration);
             services.AddSwaggerGen(c=> {
-                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo {
                     Version="v1",
                     Title="EShop Order API Endpoints",
                     Description="These API Endpoints are availeble to CRUD Order related data."
