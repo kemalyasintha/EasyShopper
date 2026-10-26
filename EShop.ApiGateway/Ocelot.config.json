@@ -60,6 +60,20 @@
         "StatusCode": 429,
         "QuotaMessage": "Rate limit exceeded. Retry later."
       }
+    },
+    {
+      "DownstreamPathTemplate": "/Cart?UserId={uid}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 18586
+        }
+      ],
+      "UpstreamPathTemplate": "/api/cart/{uid}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ]
     }
   ],
   "AsyncRoutes": {
@@ -71,6 +85,10 @@
       },
       "/api/User": {
         "CommandType": "CreateUser"
+      },
+      "/api/cart/add": {
+        "Queue": "add_cart",
+        "CommandType": "Cart"
       }
     }
   },

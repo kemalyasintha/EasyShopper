@@ -45,6 +45,8 @@ namespace EShop.ApiGateway
 
             }
 
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseOcelotQueueMiddleware();

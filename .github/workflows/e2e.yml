@@ -1,0 +1,56 @@
+name: EasyShopper E2E
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  shopping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RABBITMQ_USER: easyshopper
+      RABBITMQ_PASSWORD: e2e-isolated-run
+      JWT_SECRET_KEY: e2e-only-isolated-secret-key-at-least-64-characters-01234567890123456789
+      E2E_ARTIFACTS: ${{ github.workspace }}/TestResults
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Build BDD tests
+        run: dotnet build tests/EasyShopper.E2E -c Release
+      - name: Install Chromium
+        run: pwsh tests/EasyShopper.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+      - name: Start real dependencies and services
+        run: docker compose -p easyshopper-e2e up -d --build mongo redis rabbitmq product-api product-query-api cart-api api-gateway
+      - name: Wait for storefront and consumers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..90}; do
+            if curl --fail --silent http://localhost:6355/ > /dev/null &&
+               docker compose -p easyshopper-e2e exec -T rabbitmq rabbitmqctl list_queues name consumers | awk '$1=="create_product" && $2>0 {p=1} $1=="add_cart" && $2>0 {c=1} END {exit !(p && c)}'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+      - name: Execute UI and API specifications
+        run: dotnet test tests/EasyShopper.E2E -c Release --no-build --logger trx --results-directory TestResults
+      - name: Collect service logs
+        if: always()
+        run: |
+          mkdir -p TestResults
+          docker compose -p easyshopper-e2e logs --no-color > TestResults/services.log 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: easyshopper-e2e-evidence
+          path: TestResults
+      - name: Remove isolated test stack
+        if: always()
+        run: docker compose -p easyshopper-e2e down --volumes --remove-orphans

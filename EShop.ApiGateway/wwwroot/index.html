@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>EasyShopper</title>
+<style>body{font:18px system-ui;max-width:800px;margin:3rem auto;padding:1rem}label,input,button{display:block;margin:1rem 0}button{padding:.6rem}nav{display:flex;gap:1rem}</style>
+<nav aria-label="Language"><button type="button" data-lang="en">English</button><button type="button" data-lang="fr">Français</button></nav>
+<h1>EasyShopper</h1><h2 data-testid="heading"></h2><form id="lookup"><label for="product" data-testid="product-label"></label><input id="product" required pattern="[a-fA-F0-9]{24}"><button data-testid="search"></button></form>
+<p role="status"></p><div id="result" hidden><p data-testid="product-name"></p><button id="add" data-testid="add"></button></div>
+<script>
+const strings={en:{heading:'Shop products',label:'Product ID',search:'Find product',add:'Add to cart',missing:'Product not found',error:'Please try again',added:'Added to cart'},fr:{heading:'Acheter des produits',label:'Identifiant du produit',search:'Rechercher un produit',add:'Ajouter au panier',missing:'Produit introuvable',error:'Veuillez réessayer',added:'Ajouté au panier'}};
+let lang=localStorage.getItem('language')==='fr'?'fr':'en', product, statusKey;
+const user=localStorage.getItem('shopper')||crypto.randomUUID();localStorage.setItem('shopper',user);
+function render(){document.documentElement.lang=lang;localStorage.setItem('language',lang);for(const [id,key] of [['heading','heading'],['product-label','label'],['search','search'],['add','add']])document.querySelector(`[data-testid="${id}"]`).textContent=strings[lang][key];document.querySelector('[role="status"]').textContent=statusKey?strings[lang][statusKey]:'';}
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{lang=b.dataset.lang;render()});
+document.querySelector('#lookup').onsubmit=async e=>{e.preventDefault();document.querySelector('#result').hidden=true;try{const response=await fetch('/api/product/'+document.querySelector('#product').value);if(!response.ok){statusKey=response.status===404?'missing':'error';render();return}product=await response.json();document.querySelector('[data-testid="product-name"]').textContent=product.productName;document.querySelector('#result').hidden=false;statusKey=null;render()}catch{statusKey='error';render()}};
+document.querySelector('#add').onclick=async()=>{try{const response=await fetch('/api/cart/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cartId:crypto.randomUUID(),userId:user,amount:0,items:[{productId:product.productId,quantity:1,price:0}]})});statusKey=response.status===202?'added':'error'}catch{statusKey='error'}render()};render();
+</script></html>
