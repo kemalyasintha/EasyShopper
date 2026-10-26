@@ -75,6 +75,8 @@ services:
       Routes__1__DownstreamHostAndPorts__0__Port: "8080"
       Routes__2__DownstreamHostAndPorts__0__Host: product-query-api
       Routes__2__DownstreamHostAndPorts__0__Port: "8080"
+      Routes__3__DownstreamHostAndPorts__0__Host: cart-api
+      Routes__3__DownstreamHostAndPorts__0__Port: "8080"
       GlobalConfiguration__BaseUrl: http://api-gateway:8080
     volumes:
       - api-gateway-keys:/home/app/.aspnet/DataProtection-Keys

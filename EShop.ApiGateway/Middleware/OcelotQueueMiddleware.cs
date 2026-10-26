@@ -29,16 +29,23 @@ namespace EShop.ApiGateway.Middleware
             _asyncRoutes = asyncRoutesOptions.Value.Routes;
         }
 
-        public async Task Invoke(HttpContext httpContext, IPublishEndpoint publishEndpoint)
+        public async Task Invoke(HttpContext httpContext, IBus bus)
         {
             try
             {
-                if (httpContext.Request.Method == HttpMethod.Post.ToString())
+                if (HttpMethods.IsPost(httpContext.Request.Method) &&
+                    _asyncRoutes.TryGetValue(httpContext.Request.Path.Value, out var route))
                 {
                     object payload = await PreparePayload(httpContext);
 
-                    await publishEndpoint.Publish(payload);
-                    httpContext.Response.StatusCode = 201;
+                    if (payload == null) throw new JsonException("Request body is required.");
+                    if (!string.IsNullOrWhiteSpace(route.Queue))
+                    {
+                        var endpoint = await bus.GetSendEndpoint(new Uri($"queue:{route.Queue}"));
+                        await endpoint.Send(payload);
+                    }
+                    else await bus.Publish(payload);
+                    httpContext.Response.StatusCode = 202;
                     await httpContext.Response.WriteAsync("Your request is accepted");
                 }
                 else
@@ -46,10 +53,10 @@ namespace EShop.ApiGateway.Middleware
                     await _next(httpContext);
                 }
             }
-            catch (Exception ex)
+            catch (JsonException)
             {
-                httpContext.Response.StatusCode = 501;
-                await httpContext.Response.WriteAsync($"Error: {ex.Message}");
+                httpContext.Response.StatusCode = 400;
+                await httpContext.Response.WriteAsync("Invalid JSON request.");
             }
         }
 
